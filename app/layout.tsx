@@ -13,20 +13,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NovaEvents — Transparent Event Management on Stellar",
+  title: "Inowo — Transparent Event Management on Stellar",
   description:
     "Every sponsorship, ticket sale, and payout on-chain. Auditable and open to anyone.",
   openGraph: {
-    title: "NovaEvents — Transparent Event Management on Stellar",
+    title: "Inowo — Transparent Event Management on Stellar",
     description:
       "Every sponsorship, ticket sale, and payout on-chain. Auditable and open to anyone.",
-    siteName: "NovaEvents",
+    siteName: "Inowo",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "NovaEvents — Transparent Event Management on Stellar",
+    title: "Inowo — Transparent Event Management on Stellar",
     description:
       "Every sponsorship, ticket sale, and payout on-chain. Auditable and open to anyone.",
   },

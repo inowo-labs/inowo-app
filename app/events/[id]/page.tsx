@@ -3,7 +3,7 @@ import Nav from "../../components/Nav";
 import BackButton from "../../components/BackButton";
 
 export const metadata: Metadata = {
-  title: "Event | NovaEvents",
+  title: "Event | Inowo",
 };
 
 interface Props {
@@ -81,7 +81,7 @@ export default async function EventDetailPage({ params }: Props) {
           <span className="text-slate-500 font-mono">{id}</span> — live data
           coming once{" "}
           <a
-            href="https://github.com/inowo-labs/NovaEvent-api/issues/2"
+            href="https://github.com/inowo-labs/inowo-api/issues/2"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="API issue #2 on GitHub (opens in new tab)"

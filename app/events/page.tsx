@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Nav from "../components/Nav";
 
 export const metadata: Metadata = {
-  title: "Events | NovaEvents",
+  title: "Events | Inowo",
 };
 
 export default function EventsPage() {
@@ -47,7 +47,7 @@ export default function EventsPage() {
         <p className="text-center text-slate-600 text-sm mt-14">
           Live event data coming soon — see{" "}
           <a
-            href="https://github.com/inowo-labs/NovaEvent-api/issues/1"
+            href="https://github.com/inowo-labs/inowo-api/issues/1"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="API issue #1 on GitHub (opens in new tab)"

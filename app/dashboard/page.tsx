@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Nav from "../components/Nav";
 
 export const metadata: Metadata = {
-  title: "Organizer Dashboard | NovaEvents",
+  title: "Organizer Dashboard | Inowo",
 };
 
 export default function DashboardPage() {
@@ -65,7 +65,7 @@ export default function DashboardPage() {
         <p className="text-center text-slate-600 text-sm">
           Wallet integration tracked in{" "}
           <a
-            href="https://github.com/inowo-labs/NovaEvents-app/issues/1"
+            href="https://github.com/inowo-labs/inowo-app/issues/1"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="app issue #1 on GitHub (opens in new tab)"

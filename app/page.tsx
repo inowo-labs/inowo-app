@@ -27,7 +27,7 @@ export default function Home() {
             Explore Events
           </a>
           <a
-            href="https://github.com/inowo-labs/NovaEvents-Contract"
+            href="https://github.com/inowo-labs/inowo-Contract"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="View smart contract source on GitHub (opens in new tab)"
@@ -91,7 +91,7 @@ export default function Home() {
             Open source. Open to contributors.
           </h2>
           <p className="text-slate-400 mb-8 leading-relaxed">
-            NovaEvents is open for contribution on GrantFox — the Stellar
+            Inowo is open for contribution on GrantFox — the Stellar
             ecosystem&apos;s open-source collaboration hub. Developers,
             designers, and builders are welcome.
           </p>
@@ -110,7 +110,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-white/10 px-6 py-8">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500">
-          <span>NovaEvents — MIT License</span>
+          <span>Inowo — MIT License</span>
           <span>Built on Stellar · Settled in USDC</span>
         </div>
       </footer>
