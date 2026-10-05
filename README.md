@@ -1,6 +1,6 @@
-# NovaEvents App
+# Inowo App
 
-Frontend for NovaEvents — a transparent event management platform on Stellar.
+Frontend for Inowo — a transparent event management platform on Stellar.
 
 Built with Next.js, TypeScript, and Tailwind CSS.
 
@@ -43,7 +43,7 @@ The app uses the following environment variables. Copy `.env.example` to `.env.l
 
 | Variable | Description | Example |
 |---|---|---|
-| `NEXT_PUBLIC_API_URL` | Base URL for the NovaEvents API | `http://localhost:3001` |
+| `NEXT_PUBLIC_API_URL` | Base URL for the Inowo API | `http://localhost:3001` |
 
 ```bash
 cp .env.example .env.local
@@ -66,9 +66,9 @@ cp .env.example .env.local
 - Sponsor view — contribute to events, see public sponsorship breakdown
 - Ticket wallet — view owned tickets, show QR for check-in
 
-See the [Issues](https://github.com/inowo-labs/NovaEvents-app/issues) tab for scoped tasks.
+See the [Issues](https://github.com/inowo-labs/inowo-app/issues) tab for scoped tasks.
 
 ## Related repos
 
-- [NovaEvents contract](https://github.com/inowo-labs/NovaEvents-Contract) — Soroban smart contract (Rust)
-- [NovaEvents API](https://github.com/inowo-labs/NovaEvent-api) — off-chain indexing and notifications
+- [Inowo contract](https://github.com/inowo-labs/inowo-Contract) — Soroban smart contract (Rust)
+- [Inowo API](https://github.com/inowo-labs/inowo-api) — off-chain indexing and notifications

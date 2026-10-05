@@ -5,7 +5,7 @@ export default function Nav() {
     <nav className="border-b border-white/10 px-6 py-4">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         <Link href="/" className="font-bold text-lg tracking-tight">
-          NovaEvents
+          Inowo
         </Link>
         <div className="flex items-center gap-6">
           <Link
@@ -21,7 +21,7 @@ export default function Nav() {
             Dashboard
           </Link>
           <a
-            href="https://github.com/inowo-labs/NovaEvents-Contract"
+            href="https://github.com/inowo-labs/inowo-Contract"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="View project on GitHub (opens in new tab)"

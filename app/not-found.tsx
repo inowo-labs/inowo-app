@@ -3,7 +3,7 @@ import Link from "next/link";
 import Nav from "./components/Nav";
 
 export const metadata: Metadata = {
-  title: "Page Not Found | NovaEvents",
+  title: "Page Not Found | Inowo",
 };
 
 export default function NotFound() {
