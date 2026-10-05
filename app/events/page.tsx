@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import Nav from "../components/Nav";
 
 export const metadata: Metadata = {
@@ -19,12 +20,12 @@ export default function EventsPage() {
               payouts are publicly verifiable.
             </p>
           </div>
-          <a
+          <Link
             href="/dashboard"
             className="shrink-0 bg-violet-600 hover:bg-violet-500 text-white font-medium px-5 py-2.5 rounded-lg transition-colors text-sm"
           >
             Create Event
-          </a>
+          </Link>
         </div>
 
         {/* Skeleton cards — replaced once API integration lands */}
