@@ -92,18 +92,18 @@ export default function Home() {
             Open source. Open to contributors.
           </h2>
           <p className="text-slate-400 mb-8 leading-relaxed">
-            Inowo is open for contribution on GrantFox — the Stellar
-            ecosystem&apos;s open-source collaboration hub. Developers,
-            designers, and builders are welcome.
+            Inowo is MIT-licensed and built in the open. Developers,
+            designers, and builders are welcome — pick an issue on GitHub
+            and get started.
           </p>
           <a
-            href="https://grantfox.xyz"
+            href="https://github.com/inowo-labs"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Contribute on GrantFox (opens in new tab)"
+            aria-label="Contribute on GitHub (opens in new tab)"
             className="inline-block bg-violet-600 hover:bg-violet-500 text-white font-medium px-6 py-3 rounded-lg transition-colors"
           >
-            Contribute on GrantFox ↗
+            Contribute on GitHub ↗
           </a>
         </div>
       </section>

@@ -1,6 +1,8 @@
 # Inowo App
 
-Frontend for Inowo — a transparent event management platform on Stellar.
+Web frontend for [Inowo](https://github.com/inowo-labs/inowo-Contract) — sponsorship escrow and accountable event budgets on Stellar.
+
+Organizers create events and manage check-in, sponsors fund events and see every contribution, and attendees buy tickets — all signed with a Stellar wallet and settled in USDC by the contract.
 
 Built with Next.js, TypeScript, and Tailwind CSS.
 
@@ -61,14 +63,18 @@ cp .env.example .env.local
 ## Open for contributors
 
 - Connect wallet (Freighter)
-- Organizer dashboard — create events, manage tiers
-- Attendee view — browse events, buy tickets
-- Sponsor view — contribute to events, see public sponsorship breakdown
-- Ticket wallet — view owned tickets, show QR for check-in
+- Live event listing and event detail pages from the API
+- Sponsor view — fund an event, see the full sponsorship breakdown and escrow balance
+- Organizer dashboard — create events, manage tiers, check in tickets
+- Attendee view — buy tickets; ticket wallet with QR for check-in
 
 See the [Issues](https://github.com/inowo-labs/inowo-app/issues) tab for scoped tasks.
 
 ## Related repos
 
-- [Inowo contract](https://github.com/inowo-labs/inowo-Contract) — Soroban smart contract (Rust)
-- [Inowo API](https://github.com/inowo-labs/inowo-api) — off-chain indexing and notifications
+- [inowo-Contract](https://github.com/inowo-labs/inowo-Contract) — Soroban smart contract (Rust)
+- [inowo-api](https://github.com/inowo-labs/inowo-api) — read API over the contract
+
+## License
+
+[MIT](./LICENSE)
