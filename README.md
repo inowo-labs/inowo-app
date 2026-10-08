@@ -60,13 +60,23 @@ cp .env.example .env.local
 - **Styles:** Tailwind CSS
 - **Contract interaction:** `@stellar/stellar-sdk` (to be integrated)
 
+## Pages
+
+| Route | What it shows |
+|---|---|
+| `/` | Landing page |
+| `/events` | Every event on the contract, open events first, with escrow balance and funding progress |
+| `/events/[id]` | Event detail: status, ticket tiers, every sponsorship, every payout with its memo, escrow and released totals |
+| `/dashboard` | Organizer dashboard (wallet integration in progress) |
+
+Event pages read live from [inowo-api](https://github.com/inowo-labs/inowo-api) on every request. Run the API locally (or point `NEXT_PUBLIC_API_URL` at a deployed one) to see data.
+
 ## Open for contributors
 
 - Connect wallet (Freighter)
-- Live event listing and event detail pages from the API
-- Sponsor view — fund an event, see the full sponsorship breakdown and escrow balance
+- Sponsor flow — fund an event from the event page
 - Organizer dashboard — create events, manage tiers, check in tickets
-- Attendee view — buy tickets; ticket wallet with QR for check-in
+- Attendee flow — buy tickets, claim refunds; ticket wallet with QR for check-in
 
 See the [Issues](https://github.com/inowo-labs/inowo-app/issues) tab for scoped tasks.
 
