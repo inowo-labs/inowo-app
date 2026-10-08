@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ConnectButton from "./wallet/ConnectButton";
 
 export default function Nav() {
   return (
@@ -29,6 +30,7 @@ export default function Nav() {
           >
             GitHub ↗
           </a>
+          <ConnectButton />
         </div>
       </div>
     </nav>

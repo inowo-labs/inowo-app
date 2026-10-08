@@ -46,6 +46,9 @@ The app uses the following environment variables. Copy `.env.example` to `.env.l
 | Variable | Description | Example |
 |---|---|---|
 | `NEXT_PUBLIC_API_URL` | Base URL for the Inowo API | `http://localhost:3001` |
+| `NEXT_PUBLIC_CONTRACT_ID` | Inowo contract the wallet signs transactions for | `CCWFDV2M…NOPV` (testnet) |
+| `NEXT_PUBLIC_STELLAR_RPC_URL` | Soroban RPC used to simulate and submit transactions | `https://soroban-testnet.stellar.org` |
+| `NEXT_PUBLIC_NETWORK_PASSPHRASE` | Network the wallet must be on | `Test SDF Network ; September 2015` |
 
 ```bash
 cp .env.example .env.local
@@ -58,7 +61,7 @@ cp .env.example .env.local
 - **Framework:** Next.js (App Router)
 - **Language:** TypeScript
 - **Styles:** Tailwind CSS
-- **Contract interaction:** `@stellar/stellar-sdk` (to be integrated)
+- **Contract interaction:** `@stellar/stellar-sdk` (simulate, submit) and `@stellar/freighter-api` (wallet signing)
 
 ## Pages
 
@@ -66,17 +69,23 @@ cp .env.example .env.local
 |---|---|
 | `/` | Landing page |
 | `/events` | Every event on the contract, open events first, with escrow balance and funding progress |
-| `/events/[id]` | Event detail: status, ticket tiers, every sponsorship, every payout with its memo, escrow and released totals |
-| `/dashboard` | Organizer dashboard (wallet integration in progress) |
+| `/events/[id]` | Event detail: status, ticket tiers, every sponsorship, every payout with its memo, escrow and released totals. With a connected wallet: **sponsor** or **buy a ticket** (active events), **claim a sponsorship refund** (cancelled events) |
+| `/dashboard` | Organizer dashboard — organizer tools (create events, check-in, release funds) are next |
 
 Event pages read live from [inowo-api](https://github.com/inowo-labs/inowo-api) on every request. Run the API locally (or point `NEXT_PUBLIC_API_URL` at a deployed one) to see data.
 
+## Try it on testnet
+
+1. Install the [Freighter](https://www.freighter.app/) browser extension and switch it to **Testnet**.
+2. Fund your account with Friendbot (Freighter offers this for new testnet accounts).
+3. In Freighter, add the asset **USDC** issued by `GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5` (Circle testnet USDC).
+4. Get testnet USDC from [faucet.circle.com](https://faucet.circle.com) (choose Stellar).
+5. Open an active event, click **Connect wallet**, and sponsor or buy a ticket. The page refreshes with your contribution once the transaction confirms.
+
 ## Open for contributors
 
-- Connect wallet (Freighter)
-- Sponsor flow — fund an event from the event page
 - Organizer dashboard — create events, manage tiers, check in tickets
-- Attendee flow — buy tickets, claim refunds; ticket wallet with QR for check-in
+- Ticket wallet — list the tickets a wallet owns, claim ticket refunds, show a QR for check-in
 
 See the [Issues](https://github.com/inowo-labs/inowo-app/issues) tab for scoped tasks.
 
