@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import Nav from "../components/Nav";
+import ConnectButton from "../components/wallet/ConnectButton";
 
 export const metadata: Metadata = {
   title: "Organizer Dashboard | Inowo",
@@ -19,21 +21,23 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* Wallet connect prompt */}
         <div className="bg-violet-600/10 border border-violet-500/20 rounded-xl p-8 text-center mb-12">
-          <p className="text-violet-300 font-medium mb-2">Wallet not connected</p>
-          <p className="text-slate-400 text-sm mb-6">
-            Connect your Freighter wallet to create events and manage check-ins.
+          <p className="text-violet-300 font-medium mb-2">
+            Organizer tools are coming next
           </p>
-          <button
-            disabled
-            className="bg-violet-600 opacity-50 cursor-not-allowed text-white font-medium px-6 py-3 rounded-lg"
-          >
-            Connect Wallet (coming soon)
-          </button>
+          <p className="text-slate-400 text-sm mb-6 max-w-lg mx-auto">
+            You can already connect a Freighter wallet to sponsor events and buy
+            tickets from any{" "}
+            <Link href="/events" className="text-violet-400 hover:text-violet-300">
+              event page
+            </Link>
+            . Creating events, checking in tickets, and releasing funds from this
+            dashboard is the next step.
+          </p>
+          <ConnectButton />
         </div>
 
-        {/* Create event form — disabled until wallet is connected */}
+        {/* Preview of the create-event form; not wired to the contract yet */}
         <section className="mb-12 opacity-40 pointer-events-none select-none">
           <h2 className="text-xl font-semibold mb-6">Create New Event</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -61,20 +65,6 @@ export default function DashboardPage() {
             Create Event
           </button>
         </section>
-
-        <p className="text-center text-slate-600 text-sm">
-          Wallet integration tracked in{" "}
-          <a
-            href="https://github.com/inowo-labs/inowo-app/issues/1"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="app issue #1 on GitHub (opens in new tab)"
-            className="text-violet-500 hover:text-violet-400"
-          >
-            app issue #1
-          </a>
-          .
-        </p>
       </div>
     </div>
   );
