@@ -138,7 +138,17 @@ const features = [
   {
     icon: "✅",
     title: "Verifiable Check-in",
-    body: "Organizers check in attendees against on-chain ownership records. No spoofed QR codes, no fake tickets.",
+    body: "Organizers check in attendees against on-chain ownership records, and each ticket can only be used once.",
+  },
+  {
+    icon: "↩️",
+    title: "Guaranteed Refunds",
+    body: "If an event is cancelled, every sponsor and ticket holder claims their money back from the contract — no one has to ask the organizer.",
+  },
+  {
+    icon: "🔍",
+    title: "Open Ledger",
+    body: "Every contribution, payout, and refund is public. Anyone can verify an event's books on Stellar Expert.",
   },
 ];
 
