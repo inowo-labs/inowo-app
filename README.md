@@ -84,8 +84,17 @@ Event pages read live from [inowo-api](https://github.com/inowo-labs/inowo-api) 
 
 ## Open for contributors
 
-- Organizer dashboard — create events, manage tiers, check in tickets
-- Ticket wallet — list the tickets a wallet owns, claim ticket refunds, show a QR for check-in
+| Feature | Difficulty | Issue |
+|---------|------------|-------|
+| Create events from the organizer dashboard | Hard | [#29](https://github.com/inowo-labs/inowo-app/issues/29) |
+| Organizer controls — end, cancel, and release funds | Medium | [#30](https://github.com/inowo-labs/inowo-app/issues/30) |
+| My tickets page with ticket refunds | Medium | [#31](https://github.com/inowo-labs/inowo-app/issues/31) |
+| Check-in page for organizers | Medium | [#32](https://github.com/inowo-labs/inowo-app/issues/32) |
+| Refund history on cancelled events | Easy | [#33](https://github.com/inowo-labs/inowo-app/issues/33) |
+| Unit tests for amount parsing, formatting, and error messages | Easy | [#34](https://github.com/inowo-labs/inowo-app/issues/34) |
+| Mobile layout — nav overflows on small screens | Easy | [#35](https://github.com/inowo-labs/inowo-app/issues/35) |
+| Shared footer on every page | Easy | [#5](https://github.com/inowo-labs/inowo-app/issues/5) |
+| Highlight the active nav link | Easy | [#7](https://github.com/inowo-labs/inowo-app/issues/7) |
 
 See the [Issues](https://github.com/inowo-labs/inowo-app/issues) tab for scoped tasks.
 
