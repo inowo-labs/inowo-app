@@ -7,6 +7,7 @@ import BackButton from "../../components/BackButton";
 import StatusBadge from "../../components/StatusBadge";
 import AddressLink from "../../components/AddressLink";
 import EventActions from "../../components/wallet/EventActions";
+import OrganizerPanel from "../../components/wallet/OrganizerPanel";
 import { api, ApiError } from "../../lib/api";
 import { formatDate, formatUsdc, percent } from "../../lib/format";
 import type { InowoEvent } from "../../lib/types";
@@ -179,6 +180,12 @@ export default async function EventDetailPage({ params }: Props) {
           </div>
 
           <aside className="space-y-6">
+            <OrganizerPanel
+              eventId={event.id}
+              status={event.status}
+              organizer={event.organizer}
+              balance={balance.balance}
+            />
             <EventActions eventId={event.id} status={event.status} tiers={tiers} />
             <div className="bg-slate-900 border border-white/10 rounded-xl p-6">
               <p className="text-sm text-slate-400 mb-1">In escrow</p>
