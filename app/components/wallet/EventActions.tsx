@@ -1,17 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  friendlyError,
-  inowo,
-  parseUsdc,
-  txUrl,
-  type InvokeResult,
-} from "../../lib/contract";
+import { inowo, parseUsdc } from "../../lib/contract";
 import { formatUsdc } from "../../lib/format";
 import type { EventStatus, TicketTier } from "../../lib/types";
 import ConnectButton from "./ConnectButton";
+import { buttonClass, inputClass, panelClass } from "./styles";
+import { TxOutcome, useTransaction } from "./useTransaction";
 import { useWallet } from "./WalletProvider";
 
 interface Props {
@@ -20,32 +15,14 @@ interface Props {
   tiers: TicketTier[];
 }
 
-type Outcome = { ok: true; message: string; hash: string } | { ok: false; message: string };
-
 export default function EventActions({ eventId, status, tiers }: Props) {
   const { address, sign } = useWallet();
-  const router = useRouter();
-  const [busy, setBusy] = useState(false);
-  const [outcome, setOutcome] = useState<Outcome | null>(null);
-
-  async function run(action: () => Promise<InvokeResult>, success: string) {
-    setBusy(true);
-    setOutcome(null);
-    try {
-      const { hash } = await action();
-      setOutcome({ ok: true, message: success, hash });
-      router.refresh();
-    } catch (err) {
-      setOutcome({ ok: false, message: friendlyError(err) });
-    } finally {
-      setBusy(false);
-    }
-  }
+  const { busy, outcome, run } = useTransaction();
 
   if (status === "Ended") return null;
 
   return (
-    <div className="bg-slate-900 border border-white/10 rounded-xl p-6 space-y-6">
+    <div className={panelClass}>
       <h2 className="font-semibold">
         {status === "Active" ? "Get involved" : "Refunds"}
       </h2>
@@ -96,32 +73,10 @@ export default function EventActions({ eventId, status, tiers }: Props) {
         />
       )}
 
-      {outcome && (
-        <p
-          role="status"
-          className={`text-sm ${outcome.ok ? "text-emerald-400" : "text-red-400"}`}
-        >
-          {outcome.message}{" "}
-          {outcome.ok && (
-            <a
-              href={txUrl(outcome.hash)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-emerald-300"
-            >
-              View transaction ↗
-            </a>
-          )}
-        </p>
-      )}
+      <TxOutcome outcome={outcome} />
     </div>
   );
 }
-
-const inputClass =
-  "w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500";
-const buttonClass =
-  "w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors";
 
 function SponsorForm({
   busy,

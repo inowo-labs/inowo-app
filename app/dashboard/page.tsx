@@ -23,16 +23,15 @@ export default function DashboardPage() {
 
         <div className="bg-violet-600/10 border border-violet-500/20 rounded-xl p-8 text-center mb-12">
           <p className="text-violet-300 font-medium mb-2">
-            Organizer tools are coming next
+            Manage your events from their event pages
           </p>
           <p className="text-slate-400 text-sm mb-6 max-w-lg mx-auto">
-            You can already connect a Freighter wallet to sponsor events and buy
-            tickets from any{" "}
+            Connect the wallet you organize with and open any of your{" "}
             <Link href="/events" className="text-violet-400 hover:text-violet-300">
-              event page
-            </Link>
-            . Creating events, checking in tickets, and releasing funds from this
-            dashboard is the next step.
+              events
+            </Link>{" "}
+            to end or cancel it and release escrowed funds to recipients. Creating
+            new events from this dashboard is coming next.
           </p>
           <ConnectButton />
         </div>

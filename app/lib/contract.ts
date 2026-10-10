@@ -4,6 +4,7 @@ import {
   BASE_FEE,
   Contract,
   Networks,
+  StrKey,
   TransactionBuilder,
   nativeToScVal,
   rpc,
@@ -108,16 +109,58 @@ export const inowo = {
 
   sponsorTotal: async (eventId: number, sponsor: string): Promise<bigint> =>
     BigInt((await read("get_sponsor_total", [u32(eventId), address(sponsor)])) as bigint),
+
+  endEvent: (organizer: string, eventId: number, sign: Signer) =>
+    invoke(organizer, "end_event", [address(organizer), u32(eventId)], sign),
+
+  cancelEvent: (organizer: string, eventId: number, sign: Signer) =>
+    invoke(organizer, "cancel_event", [address(organizer), u32(eventId)], sign),
+
+  releaseFunds: (
+    organizer: string,
+    eventId: number,
+    recipient: string,
+    amount: bigint,
+    memo: string,
+    sign: Signer
+  ) =>
+    invoke(
+      organizer,
+      "release_funds",
+      [
+        address(organizer),
+        u32(eventId),
+        address(recipient),
+        i128(amount),
+        nativeToScVal(memo, { type: "string" }),
+      ],
+      sign
+    ),
 };
+
+/** Mirrors MAX_MEMO_LEN in the contract; the limit is in bytes, not characters. */
+export const MAX_MEMO_BYTES = 200;
+
+export function memoBytes(memo: string): number {
+  return new TextEncoder().encode(memo).length;
+}
+
+export function isStellarAddress(value: string): boolean {
+  return StrKey.isValidEd25519PublicKey(value.trim());
+}
 
 const CONTRACT_ERRORS: Record<number, string> = {
   3: "This event no longer exists.",
+  5: "Only the event's organizer can do this.",
   6: "This event is no longer open.",
   11: "That ticket tier doesn't exist.",
   12: "That ticket tier is sold out.",
   14: "Enter an amount greater than zero.",
   15: "Refunds open only when an event is cancelled.",
   18: "You have no sponsorship to refund for this event.",
+  19: "Funds can only be released after the event has ended.",
+  20: "That's more than the event holds in escrow.",
+  21: "The memo must be between 1 and 200 bytes.",
 };
 
 /** Turns RPC, contract, token, and wallet errors into a sentence a user can act on. */

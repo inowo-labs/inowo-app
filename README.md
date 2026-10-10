@@ -69,8 +69,8 @@ cp .env.example .env.local
 |---|---|
 | `/` | Landing page |
 | `/events` | Every event on the contract, open events first, with escrow balance and funding progress |
-| `/events/[id]` | Event detail: status, ticket tiers, every sponsorship, every payout with its memo, escrow and released totals. With a connected wallet: **sponsor** or **buy a ticket** (active events), **claim a sponsorship refund** (cancelled events) |
-| `/dashboard` | Organizer dashboard — organizer tools (create events, check-in, release funds) are next |
+| `/events/[id]` | Event detail: status, ticket tiers, every sponsorship, every payout with its memo, escrow and released totals. With a connected wallet: **sponsor** or **buy a ticket** (active events), **claim a sponsorship refund** (cancelled events). The event's organizer also gets controls to **end** or **cancel** the event and **release funds** to recipients with a memo |
+| `/dashboard` | Organizer dashboard — creating events from the app is next |
 
 Event pages read live from [inowo-api](https://github.com/inowo-labs/inowo-api) on every request. Run the API locally (or point `NEXT_PUBLIC_API_URL` at a deployed one) to see data.
 
@@ -87,7 +87,6 @@ Event pages read live from [inowo-api](https://github.com/inowo-labs/inowo-api) 
 | Feature | Difficulty | Issue |
 |---------|------------|-------|
 | Create events from the organizer dashboard | Hard | [#29](https://github.com/inowo-labs/inowo-app/issues/29) |
-| Organizer controls — end, cancel, and release funds | Medium | [#30](https://github.com/inowo-labs/inowo-app/issues/30) |
 | My tickets page with ticket refunds | Medium | [#31](https://github.com/inowo-labs/inowo-app/issues/31) |
 | Check-in page for organizers | Medium | [#32](https://github.com/inowo-labs/inowo-app/issues/32) |
 | Refund history on cancelled events | Easy | [#33](https://github.com/inowo-labs/inowo-app/issues/33) |
