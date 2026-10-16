@@ -34,6 +34,34 @@ const contract = () => new Contract(CONTRACT_ID);
 const u32 = (n: number) => nativeToScVal(n, { type: "u32" });
 const i128 = (n: bigint) => nativeToScVal(n, { type: "i128" });
 const address = (a: string) => new Address(a).toScVal();
+const str = (s: string) => nativeToScVal(s, { type: "string" });
+const u64 = (n: bigint) => nativeToScVal(n, { type: "u64" });
+
+export interface TierInput {
+  name: string;
+  /** Price in stroops. */
+  price: bigint;
+  supplyCap: number;
+}
+
+export interface NewEvent {
+  name: string;
+  description: string;
+  venue: string;
+  /** Unix seconds. */
+  dateUnix: number;
+  /** Funding goal in stroops. */
+  fundingGoal: bigint;
+  tiers: TierInput[];
+}
+
+// A #[contracttype] struct is encoded as a map with symbol keys in sorted order.
+const tierInput = (t: TierInput) =>
+  xdr.ScVal.scvMap([
+    new xdr.ScMapEntry({ key: xdr.ScVal.scvSymbol("name"), val: str(t.name) }),
+    new xdr.ScMapEntry({ key: xdr.ScVal.scvSymbol("price"), val: i128(t.price) }),
+    new xdr.ScMapEntry({ key: xdr.ScVal.scvSymbol("supply_cap"), val: u32(t.supplyCap) }),
+  ]);
 
 /** Simulates, signs, submits, and waits for a contract call to complete. */
 export async function invoke(
@@ -116,6 +144,25 @@ export const inowo = {
   cancelEvent: (organizer: string, eventId: number, sign: Signer) =>
     invoke(organizer, "cancel_event", [address(organizer), u32(eventId)], sign),
 
+  /** Creates an event and returns its ID. */
+  createEvent: async (organizer: string, event: NewEvent, sign: Signer) => {
+    const result = await invoke(
+      organizer,
+      "create_event",
+      [
+        address(organizer),
+        str(event.name),
+        str(event.description),
+        str(event.venue),
+        u64(BigInt(event.dateUnix)),
+        i128(event.fundingGoal),
+        xdr.ScVal.scvVec(event.tiers.map(tierInput)),
+      ],
+      sign
+    );
+    return { ...result, eventId: Number(result.value) };
+  },
+
   releaseFunds: (
     organizer: string,
     eventId: number,
@@ -132,7 +179,7 @@ export const inowo = {
         u32(eventId),
         address(recipient),
         i128(amount),
-        nativeToScVal(memo, { type: "string" }),
+        str(memo),
       ],
       sign
     ),
@@ -153,6 +200,10 @@ const CONTRACT_ERRORS: Record<number, string> = {
   3: "This event no longer exists.",
   5: "Only the event's organizer can do this.",
   6: "This event is no longer open.",
+  7: "Add at least one ticket tier.",
+  8: "The funding goal must be greater than zero.",
+  9: "Every ticket price must be greater than zero.",
+  10: "Every tier needs at least one ticket.",
   11: "That ticket tier doesn't exist.",
   12: "That ticket tier is sold out.",
   14: "Enter an amount greater than zero.",
