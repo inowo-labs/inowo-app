@@ -21,7 +21,7 @@ export default function ConnectButton() {
   return (
     <div className="flex items-center gap-3">
       {error && (
-        <span role="alert" className="hidden md:inline text-xs text-red-400 max-w-xs">
+        <span role="alert" className="text-xs text-red-400 max-w-[40vw] sm:max-w-xs break-all">
           {error}
         </span>
       )}

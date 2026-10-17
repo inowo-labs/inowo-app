@@ -132,9 +132,11 @@ export default async function EventDetailPage({ params }: Props) {
               ) : (
                 <ul className="bg-slate-900 border border-white/10 rounded-xl divide-y divide-white/10">
                   {sponsorships.map((s, i) => (
-                    <li key={i} className="p-4 flex justify-between text-sm">
-                      <AddressLink address={s.sponsor} />
-                      <span className="font-mono">{formatUsdc(s.amount)}</span>
+                    <li key={i} className="p-4 flex justify-between gap-3 text-sm">
+                      <span className="min-w-0 break-all">
+                        <AddressLink address={s.sponsor} />
+                      </span>
+                      <span className="font-mono shrink-0">{formatUsdc(s.amount)}</span>
                     </li>
                   ))}
                 </ul>
@@ -161,17 +163,16 @@ export default async function EventDetailPage({ params }: Props) {
                   {payouts.map((p) => (
                     <li key={p.id} className="p-4 text-sm">
                       <div className="flex justify-between gap-4 mb-1">
-                        <span className="font-medium">{p.memo}</span>
+                        <span className="font-medium min-w-0 break-words">{p.memo}</span>
                         <span className="font-mono shrink-0">
                           {formatUsdc(p.amount)}
                         </span>
                       </div>
                       <div className="flex justify-between gap-4 text-slate-500">
-                        <span>
+                        <span className="min-w-0 break-all">
                           to <AddressLink address={p.recipient} />
                         </span>
-                        <span>{formatDate(p.timestamp)}</span>
-                      </div>
+                        <span className="shrink-0">{formatDate(p.timestamp)}</span>                      </div>
                     </li>
                   ))}
                 </ul>
