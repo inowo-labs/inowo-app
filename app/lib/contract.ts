@@ -44,6 +44,26 @@ export interface TierInput {
   supplyCap: number;
 }
 
+export interface Ticket {
+  eventId: number;
+  tierIndex: number;
+  owner: string;
+  redeemed: boolean;
+  /** USDC stroops paid for the ticket. */
+  pricePaid: bigint;
+  refunded: boolean;
+}
+
+/** Shape scValToNative returns for a Soroban `Ticket` struct — snake_case, i128 as bigint. */
+interface RawTicket {
+  event_id: number;
+  tier_index: number;
+  owner: string;
+  redeemed: boolean;
+  price_paid: bigint;
+  refunded: boolean;
+}
+
 export interface NewEvent {
   name: string;
   description: string;
@@ -138,6 +158,27 @@ export const inowo = {
   sponsorTotal: async (eventId: number, sponsor: string): Promise<bigint> =>
     BigInt((await read("get_sponsor_total", [u32(eventId), address(sponsor)])) as bigint),
 
+  /** Reads a ticket straight from the contract — always current, unlike the API's cached reads. */
+  getTicket: async (eventId: number, ticketId: number): Promise<Ticket> => {
+    const raw = (await read("get_ticket", [u32(eventId), u32(ticketId)])) as RawTicket;
+    return {
+      eventId: Number(raw.event_id),
+      tierIndex: Number(raw.tier_index),
+      owner: String(raw.owner),
+      redeemed: Boolean(raw.redeemed),
+      pricePaid: BigInt(raw.price_paid),
+      refunded: Boolean(raw.refunded),
+    };
+  },
+
+  redeemTicket: (organizer: string, eventId: number, ticketId: number, sign: Signer) =>
+    invoke(
+      organizer,
+      "redeem_ticket",
+      [address(organizer), u32(eventId), u32(ticketId)],
+      sign
+    ),
+
   endEvent: (organizer: string, eventId: number, sign: Signer) =>
     invoke(organizer, "end_event", [address(organizer), u32(eventId)], sign),
 
@@ -198,6 +239,7 @@ export function isStellarAddress(value: string): boolean {
 
 const CONTRACT_ERRORS: Record<number, string> = {
   3: "This event no longer exists.",
+  4: "There's no ticket with that ID for this event.",
   5: "Only the event's organizer can do this.",
   6: "This event is no longer open.",
   7: "Add at least one ticket tier.",
@@ -206,6 +248,7 @@ const CONTRACT_ERRORS: Record<number, string> = {
   10: "Every tier needs at least one ticket.",
   11: "That ticket tier doesn't exist.",
   12: "That ticket tier is sold out.",
+  13: "This ticket has already been checked in.",
   14: "Enter an amount greater than zero.",
   15: "Refunds open only when an event is cancelled.",
   18: "You have no sponsorship to refund for this event.",
@@ -213,6 +256,19 @@ const CONTRACT_ERRORS: Record<number, string> = {
   20: "That's more than the event holds in escrow.",
   21: "The memo must be between 1 and 200 bytes.",
 };
+
+/**
+ * Pulls the numeric error code out of a simulation failure, for callers that
+ * need to branch on *which* error it was rather than just show a message
+ * (e.g. the check-in page treating "already redeemed" differently from any
+ * other rejection). Returns null for anything that isn't a contract error.
+ */
+export function contractErrorCode(err: unknown): number | null {
+  const message = err instanceof Error ? err.message : String(err);
+  if (/trustline|balance/i.test(message)) return null; // these reuse the same error shape for token errors
+  const match = /Error\(Contract, #(\d+)\)/.exec(message);
+  return match ? Number(match[1]) : null;
+}
 
 /** Turns RPC, contract, token, and wallet errors into a sentence a user can act on. */
 export function friendlyError(err: unknown): string {
