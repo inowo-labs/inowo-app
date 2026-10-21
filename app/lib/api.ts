@@ -32,6 +32,10 @@ export const api = {
   events: () => get<InowoEvent[]>("/api/events"),
   event: (id: number) => get<InowoEvent>(`/api/events/${id}`),
   tiers: (id: number) => get<TicketTier[]>(`/api/events/${id}/tiers`),
+  ticketCount: (id: number) =>
+    get<{ event_id: number; ticket_count: number }>(`/api/events/${id}/ticket-count`).then(
+      (r) => r.ticket_count
+    ),
   sponsorships: (id: number) => get<Sponsorship[]>(`/api/events/${id}/sponsorships`),
   payouts: (id: number) => get<Payout[]>(`/api/events/${id}/payouts`),
   balance: (id: number) => get<EventBalance>(`/api/events/${id}/balance`),
