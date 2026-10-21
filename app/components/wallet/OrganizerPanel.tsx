@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import {
   MAX_MEMO_BYTES,
@@ -57,9 +58,17 @@ export default function OrganizerPanel({ eventId, status, organizer, balance }: 
 
   return (
     <div className={`${panelClass} border-violet-500/30`}>
-      <div>
-        <h2 className="font-semibold">Organizer</h2>
-        <p className="text-xs text-slate-500 mt-1">Only you can see these controls.</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="font-semibold">Organizer</h2>
+          <p className="text-xs text-slate-500 mt-1">Only you can see these controls.</p>
+        </div>
+        <Link
+          href={`/events/${eventId}/check-in`}
+          className="shrink-0 text-sm text-violet-400 hover:text-violet-300"
+        >
+          Check in tickets →
+        </Link>
       </div>
 
       {status === "Active" &&
