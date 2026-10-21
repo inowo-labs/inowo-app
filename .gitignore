@@ -45,3 +45,8 @@ next-env.d.ts
 AGENTS.md
 CLAUDE.md
 .claude/
+
+# ECC Loop Solver (Fase 2)
+.knowledge/solver/
+.knowledge/optmem/
+.knowledge/orchestration/
