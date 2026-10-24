@@ -21,6 +21,12 @@ export default function Nav() {
           >
             Dashboard
           </Link>
+          <Link
+            href="/tickets"
+            className="text-sm text-slate-400 hover:text-white transition-colors"
+          >
+            My Tickets
+          </Link>
           <a
             href="https://github.com/inowo-labs/inowo-Contract"
             target="_blank"

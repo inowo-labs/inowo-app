@@ -155,6 +155,15 @@ export const inowo = {
   refundSponsorship: (sponsor: string, eventId: number, sign: Signer) =>
     invoke(sponsor, "refund_sponsorship", [address(sponsor), u32(eventId)], sign),
 
+  /** Claims back the price paid for a ticket to a cancelled event. Returns the refunded amount. */
+  refundTicket: (owner: string, eventId: number, ticketId: number, sign: Signer) =>
+    invoke(
+      owner,
+      "refund_ticket",
+      [address(owner), u32(eventId), u32(ticketId)],
+      sign
+    ),
+
   sponsorTotal: async (eventId: number, sponsor: string): Promise<bigint> =>
     BigInt((await read("get_sponsor_total", [u32(eventId), address(sponsor)])) as bigint),
 
@@ -251,6 +260,8 @@ const CONTRACT_ERRORS: Record<number, string> = {
   13: "This ticket has already been checked in.",
   14: "Enter an amount greater than zero.",
   15: "Refunds open only when an event is cancelled.",
+  16: "This ticket doesn't belong to the connected wallet.",
+  17: "This ticket has already been refunded.",
   18: "You have no sponsorship to refund for this event.",
   19: "Funds can only be released after the event has ended.",
   20: "That's more than the event holds in escrow.",
