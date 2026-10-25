@@ -2,11 +2,7 @@
 
 import Nav from "../components/Nav";
 
-export default function EventsError({
-  unstable_retry,
-}: {
-  unstable_retry: () => void;
-}) {
+export default function EventsError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       <Nav />
@@ -20,7 +16,7 @@ export default function EventsError({
           Your funds are safe on-chain — this only affects the display.
         </p>
         <button
-          onClick={() => unstable_retry()}
+          onClick={() => reset()}
           className="bg-violet-600 hover:bg-violet-500 text-white font-medium px-6 py-3 rounded-lg transition-colors"
         >
           Try again
