@@ -185,6 +185,7 @@ export default async function EventDetailPage({ params }: Props) {
               status={event.status}
               organizer={event.organizer}
               balance={balance.balance}
+              payouts={payouts}
             />
             <EventActions eventId={event.id} status={event.status} tiers={tiers} />
             <div className="bg-slate-900 border border-white/10 rounded-xl p-6">
