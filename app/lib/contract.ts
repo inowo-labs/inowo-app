@@ -36,6 +36,19 @@ const i128 = (n: bigint) => nativeToScVal(n, { type: "i128" });
 const address = (a: string) => new Address(a).toScVal();
 const str = (s: string) => nativeToScVal(s, { type: "string" });
 const u64 = (n: bigint) => nativeToScVal(n, { type: "u64" });
+/** Soroban's `Option<T>` is void for None, or T's own ScVal for Some. */
+const optionalStr = (s: string | null) => (s === null ? xdr.ScVal.scvVoid() : str(s));
+
+function hexToBytes(hex: string): Uint8Array {
+  const clean = hex.trim();
+  const bytes = new Uint8Array(clean.length / 2);
+  for (let i = 0; i < bytes.length; i++) {
+    bytes[i] = parseInt(clean.slice(i * 2, i * 2 + 2), 16);
+  }
+  return bytes;
+}
+/** Encodes a hex-encoded SHA-256 digest as a `BytesN<32>`. */
+const receiptHash = (hex: string) => nativeToScVal(hexToBytes(hex));
 
 export interface TierInput {
   name: string;
@@ -233,13 +246,42 @@ export const inowo = {
       ],
       sign
     ),
+
+  /** Attaches a SHA-256 receipt hash (hex-encoded) to a payout, once, as proof of spend. */
+  attachReceipt: (
+    organizer: string,
+    eventId: number,
+    payoutId: number,
+    receiptHashHex: string,
+    receiptUri: string | null,
+    sign: Signer
+  ) =>
+    invoke(
+      organizer,
+      "attach_receipt",
+      [
+        address(organizer),
+        u32(eventId),
+        u32(payoutId),
+        receiptHash(receiptHashHex),
+        optionalStr(receiptUri),
+      ],
+      sign
+    ),
 };
 
 /** Mirrors MAX_MEMO_LEN in the contract; the limit is in bytes, not characters. */
 export const MAX_MEMO_BYTES = 200;
 
+/** Mirrors MAX_RECEIPT_URI_LEN in the contract. */
+export const MAX_RECEIPT_URI_BYTES = 200;
+
 export function memoBytes(memo: string): number {
   return new TextEncoder().encode(memo).length;
+}
+
+export function isValidReceiptHash(value: string): boolean {
+  return /^[0-9a-fA-F]{64}$/.test(value.trim());
 }
 
 export function isStellarAddress(value: string): boolean {
@@ -266,6 +308,10 @@ const CONTRACT_ERRORS: Record<number, string> = {
   19: "Funds can only be released after the event has ended.",
   20: "That's more than the event holds in escrow.",
   21: "The memo must be between 1 and 200 bytes.",
+  22: "There's no payout with that ID for this event.",
+  23: "A ticket can't be transferred to its current owner.",
+  24: "This payout already has a receipt attached.",
+  25: "The receipt URI is longer than 200 bytes.",
 };
 
 /**

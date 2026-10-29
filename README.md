@@ -69,7 +69,7 @@ cp .env.example .env.local
 |---|---|
 | `/` | Landing page |
 | `/events` | Every event on the contract, open events first, with escrow balance and funding progress |
-| `/events/[id]` | Event detail: status, ticket tiers, every sponsorship, every payout with its memo, escrow and released totals. With a connected wallet: **sponsor** or **buy a ticket** (active events), **claim a sponsorship refund** (cancelled events). The event's organizer also gets controls to **end** or **cancel** the event and **release funds** to recipients with a memo |
+| `/events/[id]` | Event detail: status, ticket tiers, every sponsorship, every payout with its memo, escrow and released totals. With a connected wallet: **sponsor** or **buy a ticket** (active events), **claim a sponsorship refund** (cancelled events). The event's organizer also gets controls to **end** or **cancel** the event, **release funds** to recipients with a memo, and **attach a receipt hash** to a payout as proof of spend |
 | `/dashboard` | Create an event: details, funding goal, and ticket tiers, signed with the connected wallet, which becomes the organizer |
 | `/events/[id]/check-in` | Organizer-only: look up a ticket by ID and check it in at the door. Linked from the event page's Organizer panel |
 | `/tickets` | Every ticket the connected wallet holds, across every event, with its status (valid, checked in, refunded, refund available) and a **claim refund** button on cancelled events |

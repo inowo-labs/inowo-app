@@ -4,13 +4,15 @@ import Link from "next/link";
 import { useState } from "react";
 import {
   MAX_MEMO_BYTES,
+  MAX_RECEIPT_URI_BYTES,
   inowo,
   isStellarAddress,
+  isValidReceiptHash,
   memoBytes,
   parseUsdc,
 } from "../../lib/contract";
 import { formatUsdc } from "../../lib/format";
-import type { EventStatus } from "../../lib/types";
+import type { EventStatus, Payout } from "../../lib/types";
 import { buttonClass, inputClass, panelClass } from "./styles";
 import { TxOutcome, useTransaction } from "./useTransaction";
 import { useWallet } from "./WalletProvider";
@@ -21,6 +23,7 @@ interface Props {
   organizer: string;
   /** Escrow balance in stroops. */
   balance: string;
+  payouts: Payout[];
 }
 
 type Pending = "end" | "cancel" | null;
@@ -38,7 +41,7 @@ const CONFIRMATIONS: Record<"end" | "cancel", { title: string; body: string; act
   },
 };
 
-export default function OrganizerPanel({ eventId, status, organizer, balance }: Props) {
+export default function OrganizerPanel({ eventId, status, organizer, balance, payouts }: Props) {
   const { address, sign } = useWallet();
   const { busy, outcome, run } = useTransaction();
   const [pending, setPending] = useState<Pending>(null);
@@ -112,16 +115,30 @@ export default function OrganizerPanel({ eventId, status, organizer, balance }: 
         ))}
 
       {status === "Ended" && (
-        <ReleaseForm
-          balance={BigInt(balance)}
-          busy={busy}
-          onSubmit={(recipient, amount, memo) =>
-            run(
-              () => inowo.releaseFunds(organizer, eventId, recipient, amount, memo, sign),
-              `Released ${formatUsdc(amount)} — ${memo}.`
-            )
-          }
-        />
+        <>
+          <ReleaseForm
+            balance={BigInt(balance)}
+            busy={busy}
+            onSubmit={(recipient, amount, memo) =>
+              run(
+                () => inowo.releaseFunds(organizer, eventId, recipient, amount, memo, sign),
+                `Released ${formatUsdc(amount)} — ${memo}.`
+              )
+            }
+          />
+          {payouts.length > 0 && (
+            <AttachReceiptForm
+              payouts={payouts}
+              busy={busy}
+              onSubmit={(payoutId, hash, uri) =>
+                run(
+                  () => inowo.attachReceipt(organizer, eventId, payoutId, hash, uri, sign),
+                  "Receipt attached."
+                )
+              }
+            />
+          )}
+        </>
       )}
 
       <TxOutcome outcome={outcome} />
@@ -223,6 +240,96 @@ function ReleaseForm({
 
       <button type="submit" disabled={busy || !valid} className={buttonClass}>
         {busy ? "Waiting for confirmation…" : "Release funds"}
+      </button>
+    </form>
+  );
+}
+
+function AttachReceiptForm({
+  payouts,
+  busy,
+  onSubmit,
+}: {
+  payouts: Payout[];
+  busy: boolean;
+  onSubmit: (payoutId: number, hash: string, uri: string | null) => Promise<boolean>;
+}) {
+  const [payoutId, setPayoutId] = useState(payouts[0]?.id ?? 0);
+  const [hash, setHash] = useState("");
+  const [uri, setUri] = useState("");
+
+  const uriBytes = memoBytes(uri.trim());
+  const errors = {
+    hash: hash && !isValidReceiptHash(hash) ? "Enter a 64-character hex SHA-256 hash." : null,
+    uri:
+      uriBytes > MAX_RECEIPT_URI_BYTES
+        ? `URI is ${uriBytes} bytes; the limit is ${MAX_RECEIPT_URI_BYTES}.`
+        : null,
+  };
+  const valid = isValidReceiptHash(hash) && uriBytes <= MAX_RECEIPT_URI_BYTES;
+
+  return (
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault();
+        if (!valid) return;
+        if (await onSubmit(payoutId, hash.trim(), uri.trim() ? uri.trim() : null)) {
+          setHash("");
+          setUri("");
+        }
+      }}
+      className="space-y-3 pt-3 border-t border-white/10"
+    >
+      <p className="text-sm text-slate-400">
+        Attach proof of spend to a payout — a SHA-256 hash of the receipt
+        document (<code className="font-mono">sha256sum receipt.pdf</code>),
+        settable once. Keeps the document itself off-chain.
+      </p>
+
+      <Field id="receipt-payout" label="Payout" error={null}>
+        <select
+          id="receipt-payout"
+          value={payoutId}
+          onChange={(e) => setPayoutId(Number(e.target.value))}
+          className={inputClass}
+        >
+          {payouts.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.memo} — {formatUsdc(p.amount)}
+            </option>
+          ))}
+        </select>
+      </Field>
+
+      <Field id="receipt-hash" label="Receipt SHA-256 (hex)" error={errors.hash}>
+        <input
+          id="receipt-hash"
+          placeholder="64 hex characters"
+          value={hash}
+          onChange={(e) => setHash(e.target.value)}
+          className={`${inputClass} font-mono`}
+          spellCheck={false}
+        />
+      </Field>
+
+      <Field
+        id="receipt-uri"
+        label="Receipt URI (optional)"
+        error={errors.uri}
+        hint={`${uriBytes} / ${MAX_RECEIPT_URI_BYTES} bytes`}
+      >
+        <input
+          id="receipt-uri"
+          placeholder="e.g. ipfs://…"
+          value={uri}
+          onChange={(e) => setUri(e.target.value)}
+          className={inputClass}
+          spellCheck={false}
+        />
+      </Field>
+
+      <button type="submit" disabled={busy || !valid} className={buttonClass}>
+        {busy ? "Waiting for confirmation…" : "Attach receipt"}
       </button>
     </form>
   );
