@@ -9,6 +9,10 @@ export function shortAddress(address: string): string {
   return `${address.slice(0, 4)}…${address.slice(-4)}`;
 }
 
+export function shortHash(hex: string): string {
+  return `${hex.slice(0, 8)}…${hex.slice(-8)}`;
+}
+
 export function formatDate(unixSeconds: number): string {
   return new Date(unixSeconds * 1000).toLocaleDateString("en-US", {
     month: "short",
