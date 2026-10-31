@@ -9,7 +9,7 @@ import AddressLink from "../../components/AddressLink";
 import EventActions from "../../components/wallet/EventActions";
 import OrganizerPanel from "../../components/wallet/OrganizerPanel";
 import { api, ApiError } from "../../lib/api";
-import { formatDate, formatUsdc, percent } from "../../lib/format";
+import { formatDate, formatUsdc, percent, shortHash } from "../../lib/format";
 import type { InowoEvent } from "../../lib/types";
 
 interface Props {
@@ -172,6 +172,22 @@ export default async function EventDetailPage({ params }: Props) {
                         </span>
                         <span>{formatDate(p.timestamp)}</span>
                       </div>
+                      {p.receipt_hash && (
+                        <div className="mt-2 text-xs text-slate-500 font-mono">
+                          Receipt: {p.receipt_uri ? (
+                            <a
+                              href={p.receipt_uri}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline hover:text-slate-300"
+                            >
+                              {shortHash(p.receipt_hash)}
+                            </a>
+                          ) : (
+                            shortHash(p.receipt_hash)
+                          )}
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
