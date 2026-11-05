@@ -85,6 +85,8 @@ export interface NewEvent {
   dateUnix: number;
   /** Funding goal in stroops. */
   fundingGoal: bigint;
+  /** Unix seconds. Must be in the future and on or before dateUnix. */
+  fundingDeadline: number;
   tiers: TierInput[];
 }
 
@@ -219,12 +221,21 @@ export const inowo = {
         str(event.venue),
         u64(BigInt(event.dateUnix)),
         i128(event.fundingGoal),
+        u64(BigInt(event.fundingDeadline)),
         xdr.ScVal.scvVec(event.tiers.map(tierInput)),
       ],
       sign
     );
     return { ...result, eventId: Number(result.value) };
   },
+
+  /**
+   * Cancels an Active event that missed its funding deadline, opening
+   * refunds. The contract needs no authorization for this — anyone can call
+   * it — but the transaction still needs a funded account to submit it.
+   */
+  expireEvent: (caller: string, eventId: number, sign: Signer) =>
+    invoke(caller, "expire_event", [u32(eventId)], sign),
 
   releaseFunds: (
     organizer: string,
@@ -312,6 +323,9 @@ const CONTRACT_ERRORS: Record<number, string> = {
   23: "A ticket can't be transferred to its current owner.",
   24: "This payout already has a receipt attached.",
   25: "The receipt URI is longer than 200 bytes.",
+  26: "The funding deadline must be in the future and on or before the event date.",
+  27: "This event's funding deadline hasn't passed yet.",
+  28: "This event already reached its funding goal.",
 };
 
 /**

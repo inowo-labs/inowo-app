@@ -13,11 +13,32 @@ interface Props {
   eventId: number;
   status: EventStatus;
   tiers: TicketTier[];
+  /** Unix seconds. */
+  fundingDeadline: number;
+  /** Stroops. */
+  fundingGoal: string;
+  /** Stroops. */
+  balance: string;
 }
 
-export default function EventActions({ eventId, status, tiers }: Props) {
+export default function EventActions({
+  eventId,
+  status,
+  tiers,
+  fundingDeadline,
+  fundingGoal,
+  balance,
+}: Props) {
   const { address, sign } = useWallet();
   const { busy, outcome, run } = useTransaction();
+
+  // Date.now() is impure; a lazy useState initializer is the sanctioned
+  // place to read it once rather than on every render.
+  const [now] = useState(() => Date.now());
+  const expired =
+    status === "Active" &&
+    now >= fundingDeadline * 1000 &&
+    BigInt(balance) < BigInt(fundingGoal);
 
   if (status === "Ended") return null;
 
@@ -26,6 +47,20 @@ export default function EventActions({ eventId, status, tiers }: Props) {
       <h2 className="font-semibold">
         {status === "Active" ? "Get involved" : "Refunds"}
       </h2>
+
+      {expired && (
+        <ExpireEventPanel
+          address={address}
+          busy={busy}
+          onExpire={() =>
+            address &&
+            run(
+              () => inowo.expireEvent(address, eventId, sign),
+              "This event missed its funding goal and has been cancelled. Refunds are now open."
+            )
+          }
+        />
+      )}
 
       {!address ? (
         <div className="space-y-3">
@@ -36,7 +71,7 @@ export default function EventActions({ eventId, status, tiers }: Props) {
           </p>
           <ConnectButton />
         </div>
-      ) : status === "Active" ? (
+      ) : status === "Active" && !expired ? (
         <>
           <SponsorForm
             busy={busy}
@@ -58,7 +93,7 @@ export default function EventActions({ eventId, status, tiers }: Props) {
             }
           />
         </>
-      ) : (
+      ) : status === "Cancelled" ? (
         <RefundPanel
           eventId={eventId}
           address={address}
@@ -71,9 +106,34 @@ export default function EventActions({ eventId, status, tiers }: Props) {
             )
           }
         />
-      )}
+      ) : null}
 
       <TxOutcome outcome={outcome} />
+    </div>
+  );
+}
+
+function ExpireEventPanel({
+  address,
+  busy,
+  onExpire,
+}: {
+  address: string | null;
+  busy: boolean;
+  onExpire: () => void;
+}) {
+  return (
+    <div className="mb-4 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg space-y-2">
+      <p className="text-sm text-amber-200">
+        This event missed its funding deadline without reaching its goal.
+        Anyone can cancel it now — not just the organizer — to open refunds
+        for every sponsor and ticket holder.
+      </p>
+      {address && (
+        <button onClick={onExpire} disabled={busy} className={buttonClass}>
+          {busy ? "Waiting for confirmation…" : "Cancel and open refunds"}
+        </button>
+      )}
     </div>
   );
 }

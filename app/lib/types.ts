@@ -11,6 +11,8 @@ export interface InowoEvent {
   venue: string;
   date_unix: number;
   funding_goal: string;
+  /** Unix seconds; past this, anyone can call expire_event if the goal is unmet. */
+  funding_deadline: number;
   balance: string;
   status: EventStatus;
 }
