@@ -13,8 +13,8 @@ interface Props {
   eventId: number;
   status: EventStatus;
   tiers: TicketTier[];
-  /** Unix seconds. */
-  fundingDeadline: number;
+  /** Unix seconds; null for an event created before this field existed. */
+  fundingDeadline: number | null;
   /** Stroops. */
   fundingGoal: string;
   /** Stroops. */
@@ -37,6 +37,7 @@ export default function EventActions({
   const [now] = useState(() => Date.now());
   const expired =
     status === "Active" &&
+    fundingDeadline !== null &&
     now >= fundingDeadline * 1000 &&
     BigInt(balance) < BigInt(fundingGoal);
 
