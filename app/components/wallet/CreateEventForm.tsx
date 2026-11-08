@@ -30,9 +30,16 @@ function validate(form: {
   venue: string;
   date: string;
   goal: string;
+  deadline: string;
   tiers: TierDraft[];
 }):
-  | { ok: true; dateUnix: number; fundingGoal: bigint; tiers: TierInput[] }
+  | {
+      ok: true;
+      dateUnix: number;
+      fundingGoal: bigint;
+      fundingDeadline: number;
+      tiers: TierInput[];
+    }
   | { ok: false; error: string } {
   if (!form.name.trim()) return { ok: false, error: "Give the event a name." };
   if (!form.venue.trim()) return { ok: false, error: "Add a venue." };
@@ -42,6 +49,17 @@ function validate(form: {
     return { ok: false, error: "Choose a date and time." };
   if (dateMs <= Date.now())
     return { ok: false, error: "The event date must be in the future." };
+
+  const deadlineMs = Date.parse(form.deadline);
+  if (Number.isNaN(deadlineMs))
+    return { ok: false, error: "Choose a funding deadline." };
+  if (deadlineMs <= Date.now())
+    return { ok: false, error: "The funding deadline must be in the future." };
+  if (deadlineMs > dateMs)
+    return {
+      ok: false,
+      error: "The funding deadline must be on or before the event date.",
+    };
 
   const fundingGoal = parseUsdc(form.goal);
   if (fundingGoal === null || fundingGoal <= BigInt(0)) {
@@ -68,7 +86,13 @@ function validate(form: {
     tiers.push({ name: t.name.trim(), price, supplyCap: cap });
   }
 
-  return { ok: true, dateUnix: Math.floor(dateMs / 1000), fundingGoal, tiers };
+  return {
+    ok: true,
+    dateUnix: Math.floor(dateMs / 1000),
+    fundingGoal,
+    fundingDeadline: Math.floor(deadlineMs / 1000),
+    tiers,
+  };
 }
 
 export default function CreateEventForm() {
@@ -78,6 +102,7 @@ export default function CreateEventForm() {
   const [description, setDescription] = useState("");
   const [venue, setVenue] = useState("");
   const [date, setDate] = useState("");
+  const [deadline, setDeadline] = useState("");
   const [goal, setGoal] = useState("");
   const [tiers, setTiers] = useState<TierDraft[]>([
     { name: "General", price: "", supplyCap: "" },
@@ -93,7 +118,7 @@ export default function CreateEventForm() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!address) return;
-    const checked = validate({ name, description, venue, date, goal, tiers });
+    const checked = validate({ name, description, venue, date, goal, deadline, tiers });
     if (!checked.ok) {
       setError(checked.error);
       return;
@@ -109,6 +134,7 @@ export default function CreateEventForm() {
           venue: venue.trim(),
           dateUnix: checked.dateUnix,
           fundingGoal: checked.fundingGoal,
+          fundingDeadline: checked.fundingDeadline,
           tiers: checked.tiers,
         },
         sign,
@@ -162,6 +188,19 @@ export default function CreateEventForm() {
             onChange={(e) => setDate(e.target.value)}
             className={inputClass}
           />
+        </Labeled>
+        <Labeled id="event-deadline" label="Funding deadline">
+          <input
+            id="event-deadline"
+            type="datetime-local"
+            value={deadline}
+            onChange={(e) => setDeadline(e.target.value)}
+            className={inputClass}
+          />
+          <p className="text-xs text-slate-500 mt-1">
+            If the funding goal isn&apos;t met by this time, anyone can cancel
+            the event and open refunds.
+          </p>
         </Labeled>
         <Labeled id="event-goal" label="Funding goal (USDC)">
           <input

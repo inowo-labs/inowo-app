@@ -203,7 +203,14 @@ export default async function EventDetailPage({ params }: Props) {
               balance={balance.balance}
               payouts={payouts}
             />
-            <EventActions eventId={event.id} status={event.status} tiers={tiers} />
+            <EventActions
+              eventId={event.id}
+              status={event.status}
+              tiers={tiers}
+              fundingDeadline={event.funding_deadline}
+              fundingGoal={event.funding_goal}
+              balance={event.balance}
+            />
             <div className="bg-slate-900 border border-white/10 rounded-xl p-6">
               <p className="text-sm text-slate-400 mb-1">In escrow</p>
               <p className="text-3xl font-bold mb-4">
