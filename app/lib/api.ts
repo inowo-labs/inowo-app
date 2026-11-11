@@ -1,4 +1,5 @@
 import type {
+  BudgetLine,
   EventBalance,
   InowoEvent,
   Payout,
@@ -38,5 +39,6 @@ export const api = {
     ),
   sponsorships: (id: number) => get<Sponsorship[]>(`/api/events/${id}/sponsorships`),
   payouts: (id: number) => get<Payout[]>(`/api/events/${id}/payouts`),
+  budgetLines: (id: number) => get<BudgetLine[]>(`/api/events/${id}/budget-lines`),
   balance: (id: number) => get<EventBalance>(`/api/events/${id}/balance`),
 };

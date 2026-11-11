@@ -237,24 +237,32 @@ export const inowo = {
   expireEvent: (caller: string, eventId: number, sign: Signer) =>
     invoke(caller, "expire_event", [u32(eventId)], sign),
 
-  releaseFunds: (
+  /** Pays a budget line's recipient from escrow; never more than the line's remaining amount. */
+  releaseFunds: (organizer: string, eventId: number, lineId: number, amount: bigint, sign: Signer) =>
+    invoke(
+      organizer,
+      "release_funds",
+      [address(organizer), u32(eventId), u32(lineId), i128(amount)],
+      sign
+    ),
+
+  /**
+   * Publishes a planned disbursement. Only while the event is Active and
+   * before its first sponsorship or ticket sale — the budget a sponsor
+   * sees before paying can't change afterward. Returns the line ID.
+   */
+  addBudgetLine: (
     organizer: string,
     eventId: number,
     recipient: string,
     amount: bigint,
-    memo: string,
+    purpose: string,
     sign: Signer
   ) =>
     invoke(
       organizer,
-      "release_funds",
-      [
-        address(organizer),
-        u32(eventId),
-        address(recipient),
-        i128(amount),
-        str(memo),
-      ],
+      "add_budget_line",
+      [address(organizer), u32(eventId), address(recipient), i128(amount), str(purpose)],
       sign
     ),
 
@@ -326,6 +334,9 @@ const CONTRACT_ERRORS: Record<number, string> = {
   26: "The funding deadline must be in the future and on or before the event date.",
   27: "This event's funding deadline hasn't passed yet.",
   28: "This event already reached its funding goal.",
+  29: "Budget lines can only be added before the event's first sponsorship or ticket sale.",
+  30: "There's no budget line with that ID for this event.",
+  31: "That would release more than this budget line allows.",
 };
 
 /**
