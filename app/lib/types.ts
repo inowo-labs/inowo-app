@@ -46,6 +46,8 @@ export interface Payout {
   id: number;
   recipient: string;
   amount: string;
+  /** The budget line this was released against. */
+  line_id: number;
   memo: string;
   timestamp: number;
   /** Hex-encoded SHA-256 of a receipt document; null until attach_receipt is called. */
