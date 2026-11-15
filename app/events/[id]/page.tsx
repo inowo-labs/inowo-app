@@ -48,10 +48,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function EventDetailPage({ params }: Props) {
   await connection();
   const event = await loadEvent((await params).id);
-  const [tiers, sponsorships, payouts, balance] = await Promise.all([
+  const [tiers, sponsorships, payouts, budgetLines, balance] = await Promise.all([
     api.tiers(event.id),
     api.sponsorships(event.id),
     api.payouts(event.id),
+    api.budgetLines(event.id),
     api.balance(event.id),
   ]);
 
@@ -202,6 +203,7 @@ export default async function EventDetailPage({ params }: Props) {
               organizer={event.organizer}
               balance={balance.balance}
               payouts={payouts}
+              budgetLines={budgetLines}
             />
             <EventActions
               eventId={event.id}

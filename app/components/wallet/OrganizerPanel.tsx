@@ -12,7 +12,7 @@ import {
   parseUsdc,
 } from "../../lib/contract";
 import { formatUsdc } from "../../lib/format";
-import type { EventStatus, Payout } from "../../lib/types";
+import type { BudgetLine, EventStatus, Payout } from "../../lib/types";
 import { buttonClass, inputClass, panelClass } from "./styles";
 import { TxOutcome, useTransaction } from "./useTransaction";
 import { useWallet } from "./WalletProvider";
@@ -24,6 +24,7 @@ interface Props {
   /** Escrow balance in stroops. */
   balance: string;
   payouts: Payout[];
+  budgetLines: BudgetLine[];
 }
 
 type Pending = "end" | "cancel" | null;
@@ -41,7 +42,14 @@ const CONFIRMATIONS: Record<"end" | "cancel", { title: string; body: string; act
   },
 };
 
-export default function OrganizerPanel({ eventId, status, organizer, balance, payouts }: Props) {
+export default function OrganizerPanel({
+  eventId,
+  status,
+  organizer,
+  balance,
+  payouts,
+  budgetLines,
+}: Props) {
   const { address, sign } = useWallet();
   const { busy, outcome, run } = useTransaction();
   const [pending, setPending] = useState<Pending>(null);
@@ -73,6 +81,20 @@ export default function OrganizerPanel({ eventId, status, organizer, balance, pa
           Check in tickets →
         </Link>
       </div>
+
+      {status === "Active" && balance === "0" && (
+        <AddBudgetLineForm
+          busy={busy}
+          onSubmit={(recipient, amount, purpose) =>
+            run(
+              () => inowo.addBudgetLine(organizer, eventId, recipient, amount, purpose, sign),
+              `Added budget line: ${purpose}.`
+            )
+          }
+        />
+      )}
+
+      {budgetLines.length > 0 && <BudgetLinesList lines={budgetLines} />}
 
       {status === "Active" &&
         (pending ? (
@@ -118,11 +140,12 @@ export default function OrganizerPanel({ eventId, status, organizer, balance, pa
         <>
           <ReleaseForm
             balance={BigInt(balance)}
+            budgetLines={budgetLines}
             busy={busy}
-            onSubmit={(recipient, amount, memo) =>
+            onSubmit={(lineId, amount, purpose) =>
               run(
-                () => inowo.releaseFunds(organizer, eventId, recipient, amount, memo, sign),
-                `Released ${formatUsdc(amount)} — ${memo}.`
+                () => inowo.releaseFunds(organizer, eventId, lineId, amount, sign),
+                `Released ${formatUsdc(amount)} — ${purpose}.`
               )
             }
           />
@@ -148,68 +171,75 @@ export default function OrganizerPanel({ eventId, status, organizer, balance, pa
 
 function ReleaseForm({
   balance,
+  budgetLines,
   busy,
   onSubmit,
 }: {
   balance: bigint;
+  budgetLines: BudgetLine[];
   busy: boolean;
-  onSubmit: (recipient: string, amount: bigint, memo: string) => Promise<boolean>;
+  onSubmit: (lineId: number, amount: bigint, purpose: string) => Promise<boolean>;
 }) {
-  const [recipient, setRecipient] = useState("");
+  const releasable = budgetLines.filter((l) => BigInt(l.released) < BigInt(l.amount));
+  const [lineId, setLineId] = useState(releasable[0]?.id ?? 0);
   const [amountInput, setAmountInput] = useState("");
-  const [memo, setMemo] = useState("");
+
+  const line = releasable.find((l) => l.id === lineId);
+  const remaining = line ? BigInt(line.amount) - BigInt(line.released) : BigInt(0);
+  const cap = remaining < balance ? remaining : balance;
 
   const amount = parseUsdc(amountInput);
-  const bytes = memoBytes(memo.trim());
   const errors = {
-    recipient: recipient && !isStellarAddress(recipient) ? "Enter a valid Stellar address (G…)." : null,
     amount:
       amountInput && (amount === null || amount <= BigInt(0))
         ? "Enter a positive USDC amount."
-        : amount !== null && amount > balance
-          ? `Only ${formatUsdc(balance)} is in escrow.`
+        : amount !== null && amount > cap
+          ? `Only ${formatUsdc(cap)} is left for this line.`
           : null,
-    memo: bytes > MAX_MEMO_BYTES ? `Memo is ${bytes} bytes; the limit is ${MAX_MEMO_BYTES}.` : null,
   };
-  const valid =
-    isStellarAddress(recipient) &&
-    amount !== null &&
-    amount > BigInt(0) &&
-    amount <= balance &&
-    bytes > 0 &&
-    bytes <= MAX_MEMO_BYTES;
+  const valid = !!line && amount !== null && amount > BigInt(0) && amount <= cap;
 
   if (balance === BigInt(0)) {
     return <p className="text-sm text-slate-400">All escrowed funds have been released.</p>;
+  }
+  if (releasable.length === 0) {
+    return (
+      <p className="text-sm text-slate-400">
+        No budget line has anything left to release — publish a new one before the event
+        starts next time to release more.
+      </p>
+    );
   }
 
   return (
     <form
       onSubmit={async (e) => {
         e.preventDefault();
-        if (!valid || amount === null) return;
-        if (await onSubmit(recipient.trim(), amount, memo.trim())) {
-          setRecipient("");
+        if (!valid || amount === null || !line) return;
+        if (await onSubmit(line.id, amount, line.purpose)) {
           setAmountInput("");
-          setMemo("");
         }
       }}
       className="space-y-3"
     >
       <p className="text-sm text-slate-400">
-        Release funds to a recipient. Each payout is public, with its memo, next to every
+        Release funds against a budget line. Each payout is public, next to every
         contribution. {formatUsdc(balance)} in escrow.
       </p>
 
-      <Field id="release-recipient" label="Recipient address" error={errors.recipient}>
-        <input
-          id="release-recipient"
-          placeholder="G…"
-          value={recipient}
-          onChange={(e) => setRecipient(e.target.value)}
-          className={`${inputClass} font-mono`}
-          spellCheck={false}
-        />
+      <Field id="release-line" label="Budget line" error={null}>
+        <select
+          id="release-line"
+          value={lineId}
+          onChange={(e) => setLineId(Number(e.target.value))}
+          className={inputClass}
+        >
+          {releasable.map((l) => (
+            <option key={l.id} value={l.id}>
+              {l.purpose} — {formatUsdc(BigInt(l.amount) - BigInt(l.released))} left
+            </option>
+          ))}
+        </select>
       </Field>
 
       <Field id="release-amount" label="Amount (USDC)" error={errors.amount}>
@@ -223,25 +253,118 @@ function ReleaseForm({
         />
       </Field>
 
+      <button type="submit" disabled={busy || !valid} className={buttonClass}>
+        {busy ? "Waiting for confirmation…" : "Release funds"}
+      </button>
+    </form>
+  );
+}
+
+function AddBudgetLineForm({
+  busy,
+  onSubmit,
+}: {
+  busy: boolean;
+  onSubmit: (recipient: string, amount: bigint, purpose: string) => Promise<boolean>;
+}) {
+  const [recipient, setRecipient] = useState("");
+  const [amountInput, setAmountInput] = useState("");
+  const [purpose, setPurpose] = useState("");
+
+  const amount = parseUsdc(amountInput);
+  const bytes = memoBytes(purpose.trim());
+  const errors = {
+    recipient: recipient && !isStellarAddress(recipient) ? "Enter a valid Stellar address (G…)." : null,
+    amount:
+      amountInput && (amount === null || amount <= BigInt(0))
+        ? "Enter a positive USDC amount."
+        : null,
+    purpose: bytes > MAX_MEMO_BYTES ? `Purpose is ${bytes} bytes; the limit is ${MAX_MEMO_BYTES}.` : null,
+  };
+  const valid =
+    isStellarAddress(recipient) &&
+    amount !== null &&
+    amount > BigInt(0) &&
+    bytes > 0 &&
+    bytes <= MAX_MEMO_BYTES;
+
+  return (
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault();
+        if (!valid || amount === null) return;
+        if (await onSubmit(recipient.trim(), amount, purpose.trim())) {
+          setRecipient("");
+          setAmountInput("");
+          setPurpose("");
+        }
+      }}
+      className="space-y-3 pb-3 border-b border-white/10"
+    >
+      <p className="text-sm text-slate-400">
+        Publish a budget line before anyone funds this event — sponsors see it before
+        paying, and it locks the moment the first contribution lands.
+      </p>
+
+      <Field id="line-recipient" label="Recipient address" error={errors.recipient}>
+        <input
+          id="line-recipient"
+          placeholder="G…"
+          value={recipient}
+          onChange={(e) => setRecipient(e.target.value)}
+          className={`${inputClass} font-mono`}
+          spellCheck={false}
+        />
+      </Field>
+
+      <Field id="line-amount" label="Amount (USDC)" error={errors.amount}>
+        <input
+          id="line-amount"
+          inputMode="decimal"
+          placeholder="e.g. 250"
+          value={amountInput}
+          onChange={(e) => setAmountInput(e.target.value)}
+          className={inputClass}
+        />
+      </Field>
+
       <Field
-        id="release-memo"
-        label="What is this payment for?"
-        error={errors.memo}
+        id="line-purpose"
+        label="What is this for?"
+        error={errors.purpose}
         hint={`${bytes} / ${MAX_MEMO_BYTES} bytes`}
       >
         <input
-          id="release-memo"
+          id="line-purpose"
           placeholder="e.g. Sound crew"
-          value={memo}
-          onChange={(e) => setMemo(e.target.value)}
+          value={purpose}
+          onChange={(e) => setPurpose(e.target.value)}
           className={inputClass}
         />
       </Field>
 
       <button type="submit" disabled={busy || !valid} className={buttonClass}>
-        {busy ? "Waiting for confirmation…" : "Release funds"}
+        {busy ? "Waiting for confirmation…" : "Add budget line"}
       </button>
     </form>
+  );
+}
+
+function BudgetLinesList({ lines }: { lines: BudgetLine[] }) {
+  return (
+    <div className="pb-3 border-b border-white/10">
+      <p className="text-xs text-slate-500 mb-2">Published budget</p>
+      <ul className="space-y-1">
+        {lines.map((l) => (
+          <li key={l.id} className="flex justify-between text-sm">
+            <span className="text-slate-300">{l.purpose}</span>
+            <span className="font-mono text-slate-400">
+              {formatUsdc(l.released)} / {formatUsdc(l.amount)}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
