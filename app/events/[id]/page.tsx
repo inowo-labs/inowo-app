@@ -143,6 +143,33 @@ export default async function EventDetailPage({ params }: Props) {
             </section>
 
             <section>
+              <h2 className="text-xl font-semibold mb-4">Budget</h2>
+              {budgetLines.length === 0 ? (
+                <p className="text-slate-500 text-sm border border-dashed border-white/10 rounded-xl p-6">
+                  {event.status === "Active"
+                    ? "The organizer hasn't published a budget yet."
+                    : "No budget was published for this event."}
+                </p>
+              ) : (
+                <ul className="bg-slate-900 border border-white/10 rounded-xl divide-y divide-white/10">
+                  {budgetLines.map((line) => (
+                    <li key={line.id} className="p-4 text-sm">
+                      <div className="flex justify-between gap-4 mb-1">
+                        <span className="font-medium">{line.purpose}</span>
+                        <span className="font-mono shrink-0">
+                          {formatUsdc(line.released)} / {formatUsdc(line.amount)}
+                        </span>
+                      </div>
+                      <span className="text-slate-500">
+                        to <AddressLink address={line.recipient} />
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            <section>
               <div className="flex items-baseline justify-between mb-4">
                 <h2 className="text-xl font-semibold">Payouts</h2>
                 <span className="text-sm text-slate-400">
