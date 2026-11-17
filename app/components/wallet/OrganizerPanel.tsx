@@ -23,6 +23,8 @@ interface Props {
   organizer: string;
   /** Escrow balance in stroops. */
   balance: string;
+  /** Stroops. */
+  fundingGoal: string;
   payouts: Payout[];
   budgetLines: BudgetLine[];
 }
@@ -47,6 +49,7 @@ export default function OrganizerPanel({
   status,
   organizer,
   balance,
+  fundingGoal,
   payouts,
   budgetLines,
 }: Props) {
@@ -84,6 +87,10 @@ export default function OrganizerPanel({
 
       {status === "Active" && balance === "0" && (
         <AddBudgetLineForm
+          remaining={
+            BigInt(fundingGoal) -
+            budgetLines.reduce((sum, l) => sum + BigInt(l.amount), BigInt(0))
+          }
           busy={busy}
           onSubmit={(recipient, amount, purpose) =>
             run(
@@ -261,9 +268,12 @@ function ReleaseForm({
 }
 
 function AddBudgetLineForm({
+  remaining,
   busy,
   onSubmit,
 }: {
+  /** Stroops still unbudgeted against the event's funding goal. */
+  remaining: bigint;
   busy: boolean;
   onSubmit: (recipient: string, amount: bigint, purpose: string) => Promise<boolean>;
 }) {
@@ -278,15 +288,26 @@ function AddBudgetLineForm({
     amount:
       amountInput && (amount === null || amount <= BigInt(0))
         ? "Enter a positive USDC amount."
-        : null,
+        : amount !== null && amount > remaining
+          ? `Only ${formatUsdc(remaining)} is left of the funding goal to budget.`
+          : null,
     purpose: bytes > MAX_MEMO_BYTES ? `Purpose is ${bytes} bytes; the limit is ${MAX_MEMO_BYTES}.` : null,
   };
   const valid =
     isStellarAddress(recipient) &&
     amount !== null &&
     amount > BigInt(0) &&
+    amount <= remaining &&
     bytes > 0 &&
     bytes <= MAX_MEMO_BYTES;
+
+  if (remaining <= BigInt(0)) {
+    return (
+      <p className="text-sm text-slate-400 pb-3 border-b border-white/10">
+        The full funding goal is already budgeted.
+      </p>
+    );
+  }
 
   return (
     <form
@@ -303,7 +324,8 @@ function AddBudgetLineForm({
     >
       <p className="text-sm text-slate-400">
         Publish a budget line before anyone funds this event — sponsors see it before
-        paying, and it locks the moment the first contribution lands.
+        paying, and it locks the moment the first contribution lands.{" "}
+        {formatUsdc(remaining)} left to budget of the funding goal.
       </p>
 
       <Field id="line-recipient" label="Recipient address" error={errors.recipient}>
