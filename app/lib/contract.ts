@@ -337,6 +337,7 @@ const CONTRACT_ERRORS: Record<number, string> = {
   29: "Budget lines can only be added before the event's first sponsorship or ticket sale.",
   30: "There's no budget line with that ID for this event.",
   31: "That would release more than this budget line allows.",
+  32: "That would push the published budget past the event's funding goal.",
 };
 
 /**
