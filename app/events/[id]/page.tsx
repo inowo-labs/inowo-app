@@ -229,6 +229,7 @@ export default async function EventDetailPage({ params }: Props) {
               status={event.status}
               organizer={event.organizer}
               balance={balance.balance}
+              fundingGoal={event.funding_goal}
               payouts={payouts}
               budgetLines={budgetLines}
             />
