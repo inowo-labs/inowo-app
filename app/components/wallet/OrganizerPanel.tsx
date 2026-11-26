@@ -399,7 +399,8 @@ function AttachReceiptForm({
   busy: boolean;
   onSubmit: (payoutId: number, hash: string, uri: string | null) => Promise<boolean>;
 }) {
-  const [payoutId, setPayoutId] = useState(payouts[0]?.id ?? 0);
+  const pending = payouts.filter((p) => !p.receipt_hash);
+  const [payoutId, setPayoutId] = useState(pending[0]?.id ?? 0);
   const [hash, setHash] = useState("");
   const [uri, setUri] = useState("");
 
@@ -412,6 +413,14 @@ function AttachReceiptForm({
         : null,
   };
   const valid = isValidReceiptHash(hash) && uriBytes <= MAX_RECEIPT_URI_BYTES;
+
+  if (pending.length === 0) {
+    return (
+      <p className="text-sm text-slate-400 pt-3 border-t border-white/10">
+        Every payout already has a receipt attached.
+      </p>
+    );
+  }
 
   return (
     <form
@@ -438,7 +447,7 @@ function AttachReceiptForm({
           onChange={(e) => setPayoutId(Number(e.target.value))}
           className={inputClass}
         >
-          {payouts.map((p) => (
+          {pending.map((p) => (
             <option key={p.id} value={p.id}>
               {p.memo} — {formatUsdc(p.amount)}
             </option>
